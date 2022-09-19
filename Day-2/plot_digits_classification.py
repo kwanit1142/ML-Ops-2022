@@ -39,6 +39,7 @@ def new_data(data,size):
 	return new_features
 
 digits = datasets.load_digits()
+print(digits.images[0].shape)
 '''
 _, axes = plt.subplots(nrows=1, ncols=4, figsize=(10, 3))
 for ax, image, label in zip(axes, digits.images, digits.target):
@@ -64,7 +65,7 @@ for ax, image, label in zip(axes, digits.images, digits.target):
 # flatten the images
 n_samples = len(digits.images)
 #data = digits.images.reshape((n_samples, -1))
-user_size = 32
+user_size = 8
 data = new_data(digits.data,user_size)
 print(" ")
 print('For Image Size = '+str(user_size)+'x'+str(user_size))
