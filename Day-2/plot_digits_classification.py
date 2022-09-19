@@ -13,10 +13,12 @@ hand-written digits, from 0-9.
 
 # Standard scientific Python imports
 import matplotlib.pyplot as plt
-
+import numpy as np
 # Import datasets, classifiers and performance metrics
 from sklearn import datasets, svm, metrics
 from sklearn.model_selection import train_test_split
+from skimage import transform
+from tabulate import tabulate
 ###############################################################################
 # Digits dataset
 # --------------
@@ -30,6 +32,11 @@ from sklearn.model_selection import train_test_split
 #
 # Note: if we were working from image files (e.g., 'png' files), we would load
 # them using :func:`matplotlib.pyplot.imread`.
+
+def new_data(data,size):
+	new_features = np.array(list(map(lambda img: transform.resize(
+				img.reshape(8,8),(size,size),mode='constant',preserve_range=True).ravel(),data)))
+	return new_features
 
 digits = datasets.load_digits()
 '''
@@ -56,11 +63,20 @@ for ax, image, label in zip(axes, digits.images, digits.target):
 
 # flatten the images
 n_samples = len(digits.images)
-data = digits.images.reshape((n_samples, -1))
-
-GAMMA = [4,2,1,0.1,0.01,0.001,0.0001]
-C = [0.125,0.25,0.5,1,2,4,8]
-
+#data = digits.images.reshape((n_samples, -1))
+user_size = 32
+data = new_data(digits.data,user_size)
+print(" ")
+print('For Image Size = '+str(user_size)+'x'+str(user_size))
+GAMMA = [10,1,0.1,0.01,0.001]
+C = [0.125,0.25,0.5,1,2]
+best_gam = 0
+best_c = 0
+best_mean_acc=0
+best_train=0
+best_val=0
+best_test=0
+table = [['Gamma','C','Training Acc.','Val (Dev) Acc.','Test Acc.']]
 for GAM in GAMMA:
 	for c in C:
 		hyper_params = {'gamma':GAM, 'C':c}
@@ -69,10 +85,25 @@ for GAM in GAMMA:
 		X_train, X, y_train, y = train_test_split(data, digits.target, test_size=0.1, shuffle=False)
 		x_val, x_test, y_val, y_test = train_test_split(X,y,test_size=0.5,shuffle=False)
 		clf.fit(X_train, y_train)
-		predicted = clf.predict(x_val)
-		accuracy = 100*metrics.accuracy_score(y_val,predicted)
-		print('For Gamma = '+str(GAM)+' and C = '+str(c)+', Accuracy Percentage = '+str(accuracy)+' %')
-
+		predicted_val = clf.predict(x_val)
+		predicted_train = clf.predict(X_train)
+		predicted_test = clf.predict(x_test)
+		accuracy_val = 100*metrics.accuracy_score(y_val,predicted_val)
+		accuracy_train = 100*metrics.accuracy_score(y_train, predicted_train)
+		accuracy_test = 100*metrics.accuracy_score(y_test, predicted_test)
+		table.append([GAM,c,str(accuracy_train)+'%',str(accuracy_val)+'%',str(accuracy_test)+'%'])
+		mean_acc = (accuracy_train+accuracy_val+accuracy_test)/3
+		if mean_acc>best_mean_acc:
+			best_gam = GAM
+			best_c = c
+			best_train=accuracy_train
+			best_val=accuracy_val
+			best_test=accuracy_test
+print(tabulate(table, headers='firstrow', tablefmt='fancy_grid'))
+print(" ")
+print('Best Hyperparameters (Gamma and C) => '+str(best_gam)+' and '+str(best_c))
+print('Train, Val (Dev) and Test Accuracies => '+str(best_train)+'%, '+str(best_val)+'%, '+str(best_test)+'%')
+print(" ")
 ###############################################################################
 # Below we visualize the first 4 test samples and show their predicted
 # digit value in the title.
