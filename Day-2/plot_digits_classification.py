@@ -10,7 +10,7 @@ hand-written digits, from 0-9.
 
 # Author: Gael Varoquaux <gael dot varoquaux at normalesup dot org>
 # License: BSD 3 clause
-
+from statistics import median
 # Standard scientific Python imports
 import matplotlib.pyplot as plt
 import numpy as np
@@ -39,7 +39,6 @@ def new_data(data,size):
 	return new_features
 
 digits = datasets.load_digits()
-print(digits.images[0].shape)
 '''
 _, axes = plt.subplots(nrows=1, ncols=4, figsize=(10, 3))
 for ax, image, label in zip(axes, digits.images, digits.target):
@@ -61,29 +60,32 @@ for ax, image, label in zip(axes, digits.images, digits.target):
 # vector classifier on the train samples. The fitted classifier can
 # subsequently be used to predict the value of the digit for the samples
 # in the test subset.
-
+user_split = 0.5
 # flatten the images
 n_samples = len(digits.images)
 #data = digits.images.reshape((n_samples, -1))
 user_size = 8
 data = new_data(digits.data,user_size)
 print(" ")
-print('For Image Size = '+str(user_size)+'x'+str(user_size))
-GAMMA = [10,1,0.1,0.01,0.001]
-C = [0.125,0.25,0.5,1,2]
+print('For Image Size = '+str(user_size)+'x'+str(user_size)+' and Train-Val-Test Split => '+str(int(100*(1-user_split)))+
+	'-'+str(int(50*user_split))+'-'+str(int(50*user_split)))
+
+GAMMA = [100,10,1,0.1]
+C = [0.5,1,2,4]
+
 best_gam = 0
 best_c = 0
 best_mean_acc=0
 best_train=0
 best_val=0
 best_test=0
-table = [['Gamma','C','Training Acc.','Val (Dev) Acc.','Test Acc.']]
+table = [['Gamma','C','Training Acc.','Val (Dev) Acc.','Test Acc.','Min Acc.','Max Acc.','Median Acc.','Mean Acc.']]
 for GAM in GAMMA:
 	for c in C:
 		hyper_params = {'gamma':GAM, 'C':c}
 		clf = svm.SVC()
 		clf.set_params(**hyper_params)
-		X_train, X, y_train, y = train_test_split(data, digits.target, test_size=0.1, shuffle=False)
+		X_train, X, y_train, y = train_test_split(data, digits.target, test_size=user_split, shuffle=False)
 		x_val, x_test, y_val, y_test = train_test_split(X,y,test_size=0.5,shuffle=False)
 		clf.fit(X_train, y_train)
 		predicted_val = clf.predict(x_val)
@@ -92,9 +94,13 @@ for GAM in GAMMA:
 		accuracy_val = 100*metrics.accuracy_score(y_val,predicted_val)
 		accuracy_train = 100*metrics.accuracy_score(y_train, predicted_train)
 		accuracy_test = 100*metrics.accuracy_score(y_test, predicted_test)
-		table.append([GAM,c,str(accuracy_train)+'%',str(accuracy_val)+'%',str(accuracy_test)+'%'])
-		mean_acc = (accuracy_train+accuracy_val+accuracy_test)/3
-		if mean_acc>best_mean_acc:
+		mean_acc = (accuracy_val + accuracy_train + accuracy_test)/3
+		min_acc = min([accuracy_train,accuracy_val,accuracy_test])
+		max_acc = max([accuracy_val,accuracy_train,accuracy_test])
+		median_acc = median([accuracy_val,accuracy_train,accuracy_test])
+		table.append([GAM,c,str(accuracy_train)+'%',str(accuracy_val)+'%',str(accuracy_test)+'%',str(min_acc)+'%',
+				str(max_acc)+'%',str(median_acc)+'%',str(mean_acc)+'%'])
+		if accuracy_test>best_test:
 			best_gam = GAM
 			best_c = c
 			best_train=accuracy_train
