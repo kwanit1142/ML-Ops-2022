@@ -6,3 +6,4 @@ pandas
 nltk
 tabulate
 statistics
+pytest
