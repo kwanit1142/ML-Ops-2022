@@ -73,8 +73,8 @@ for user_split in user_split_list:
         print('For Image Size = '+str(user_size)+'x'+str(user_size)+' and Train-Val-Test Split => '+str(int(100*(1-user_split)))+
                 '-'+str(int(50*user_split))+'-'+str(int(50*user_split)))
 
-        GAMMA = [1/8,1,8]
-        C = [1/8,1,8]
+        GAMMA = [0.001,0.01,0.1]
+        C = [1,0.1,10]
 
         best_gam = 0
         best_c = 0
@@ -116,19 +116,19 @@ for user_split in user_split_list:
         print(" ")
         entry.append(count)
         entry.append(best_test)
-        max_features = ['sqrt','log2']
-        ccp = [1/8,1,8]
+        max_dep = [40.80,120]
+        max_leaf = [450,900,1350]
 
-        best_feat = 0
-        best_ccp = 0
+        best_depth = 0
+        best_leaf = 0
         best_mean_accd=0
         best_traind=0
         best_vald=0
         best_testd=0
-        table_ii = [['Max_Features','ccp','Training Acc.','Val (Dev) Acc.','Test Acc.','Min Acc.','Max Acc.','Median Acc.','Mean Acc.']]
-        for feat in max_features:
-                for cc in ccp:
-                        hyper_paramsd = {'max_features':feat, 'ccp_alpha':cc}
+        table_ii = [['Max_Depth','Max_Leaf_Nodes','Training Acc.','Val (Dev) Acc.','Test Acc.','Min Acc.','Max Acc.','Median Acc.','Mean Acc.']]
+        for dep in max_dep:
+                for leaf in max_leaf:
+                        hyper_paramsd = {'max_depth':dep, 'max_leaf_nodes':leaf}
                         clfd = tree.DecisionTreeClassifier()
                         clfd.set_params(**hyper_paramsd)
                         X_train, X, y_train, y = train_test_split(data, digits.target, test_size=user_split, shuffle=False)
@@ -144,11 +144,11 @@ for user_split in user_split_list:
                         min_acc = min([accuracy_train,accuracy_val,accuracy_test])
                         max_acc = max([accuracy_val,accuracy_train,accuracy_test])
                         median_acc = median([accuracy_val,accuracy_train,accuracy_test])
-                        table_ii.append([feat,cc,str(accuracy_train)+'%',str(accuracy_val)+'%',str(accuracy_test)+'%',str(min_acc)+'%',
+                        table_ii.append([dep,leaf,str(accuracy_train)+'%',str(accuracy_val)+'%',str(accuracy_test)+'%',str(min_acc)+'%',
                                         str(max_acc)+'%',str(median_acc)+'%',str(mean_acc)+'%'])
                         if accuracy_test>best_testd:
-                                best_feat = feat
-                                best_ccp = cc
+                                best_depth = dep
+                                best_leaf = leaf
                                 best_traind=accuracy_train
                                 best_vald=accuracy_val
                                 best_testd=accuracy_test
