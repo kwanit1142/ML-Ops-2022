@@ -82,6 +82,7 @@ for user_split in user_split_list:
         best_train=0
         best_val=0
         best_test=0
+        pred_test = 0
         table = [['Gamma','C','Training Acc.','Val (Dev) Acc.','Test Acc.','Min Acc.','Max Acc.','Median Acc.','Mean Acc.']]
         for GAM in GAMMA:
                 for c in C:
@@ -109,6 +110,8 @@ for user_split in user_split_list:
                                 best_train=accuracy_train
                                 best_val=accuracy_val
                                 best_test=accuracy_test
+                                pred_test = predicted_test
+        pred_unis, pred_counts = np.unique(pred_test, return_counts=True)
         print(tabulate(table, headers='firstrow', tablefmt='fancy_grid'))
         print(" ")
         print('Best Hyperparameters (Gamma and C) => '+str(best_gam)+' and '+str(best_c))
@@ -125,6 +128,7 @@ for user_split in user_split_list:
         best_traind=0
         best_vald=0
         best_testd=0
+        pred_testd=0
         table_ii = [['Max_Depth','Max_Leaf_Nodes','Training Acc.','Val (Dev) Acc.','Test Acc.','Min Acc.','Max Acc.','Median Acc.','Mean Acc.']]
         for dep in max_dep:
                 for leaf in max_leaf:
@@ -152,6 +156,8 @@ for user_split in user_split_list:
                                 best_traind=accuracy_train
                                 best_vald=accuracy_val
                                 best_testd=accuracy_test
+                                pred_testd = predicted_test
+        pred_uniqued, pred_countd = np.unique(pred_testd, return_counts=True)
         print(tabulate(table_ii, headers='firstrow', tablefmt='fancy_grid'))
         entry.append(best_testd)
         print(" ")
@@ -159,6 +165,8 @@ for user_split in user_split_list:
         print('Train, Val (Dev) and Test Accuracies => '+str(best_traind)+'%, '+str(best_vald)+'%, '+str(best_testd)+'%')
         print(" ")
         table_final.append(entry)
+        print("Predictions of Best SVM:-", dict(zip(pred_unis, pred_counts)))
+        print("Predictions of Best DTC:-", dict(zip(pred_uniqued, pred_countd)))
 
 svm_list = [float(table_final[i][1]) for i in range(1,5)]
 dtc_list = [float(table_final[i][2]) for i in range(1,5)]
