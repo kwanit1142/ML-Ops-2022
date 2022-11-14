@@ -121,7 +121,6 @@ for user_split in user_split_list:
         entry.append(best_test)
         max_dep = [40.80,120]
         max_leaf = [450,900,1350]
-
         best_depth = 0
         best_leaf = 0
         best_mean_accd=0
@@ -161,7 +160,7 @@ for user_split in user_split_list:
         print(tabulate(table_ii, headers='firstrow', tablefmt='fancy_grid'))
         entry.append(best_testd)
         print(" ")
-        print('Best Hyperparameters (Max_Features and ccp) => '+str(best_feat)+' and '+str(best_ccp))
+        print('Best Hyperparameters (Depth and Leaves) => '+str(best_depth)+' and '+str(best_leaf))
         print('Train, Val (Dev) and Test Accuracies => '+str(best_traind)+'%, '+str(best_vald)+'%, '+str(best_testd)+'%')
         print(" ")
         table_final.append(entry)
