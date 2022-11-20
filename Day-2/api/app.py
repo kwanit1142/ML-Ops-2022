@@ -7,20 +7,15 @@ app = Flask(__name__)
 def hello_world():
 	return "<p>Hello, World!</p>"
 
-model_path = 'best_svm_model.joblib'
+model_path = '/models/svm_gamma=0.001_C=0.2.joblib'
 
 @app.route("/predict",methods=['POST'])
 def predict_digit():
-	image_1 = request.json['image_1']
-	image_2 = request.json['image_2']
+	image = request.json['image']
+	model_path = request.json['model_name']
 	model = load(model_path)
 	print('done......loading')
-	predicted_1 = model.predict([image_1])
-	predicted_2 = model.predict([image_2])
-	if int(predicted_1[0]) == int(predicted_2[0]):
-		return 'The Images belong to same digit'
-	else:
-		return 'The Images belong to different digits'
+	return model.predict([image])[0]
 
 if __name__=="__main__":
-	app.run(debug=True)
+	app.run(debug=True, host='0.0.0.0',port=5000)
